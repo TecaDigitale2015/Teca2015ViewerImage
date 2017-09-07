@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>mx.teca2015.viewerImage</groupId>
+    <artifactId>TecaViewerImage</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <groupId>mx.teca2015.viewerImage.schema</groupId>
+  <artifactId>TecaViewerSchema</artifactId>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- GWT needs at least java 1.6 -->
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+  	<dependency>
+  		<groupId>mx.randalf.xsd</groupId>
+  		<artifactId>RandalfXsd</artifactId>
+  		<version>1.0.5</version>
+  	</dependency>
+  </dependencies>
+	<distributionManagement>
+		<repository>
+			<id>mvn-bncf</id>
+			<name>mvn-bncf-releases</name>
+			<url>http://maven.bncf.firenze.sbn.it/artifactory/libs-release-local</url>
+		</repository>
+	</distributionManagement>
+	<version>1.0.2</version>
+</project>

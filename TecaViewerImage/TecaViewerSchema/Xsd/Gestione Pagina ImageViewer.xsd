@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.imageViewer.mx/schema/gestionePagina"
+    xmlns="http://www.imageViewer.mx/schema/gestionePagina"
+    xmlns:opera="http://www.imageViewer.mx/schema/gestioneOpera">
+    <xs:import namespace="http://www.imageViewer.mx/schema/gestioneOpera"
+        schemaLocation="Gestione%20Lista%20Opere.xsd"/>
+    <xs:element name="imageViewer">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="titolo" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="it">Titolo della pagina html</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="idr" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="it">Identificativo dell'opera da visualizzare</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="showNavigatore" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="it">Indica se è presente più di una opera collegata</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="xs:boolean">
+                                <xs:attributeGroup ref="gIdentificativi"/>
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element minOccurs="0" name="showStru">
+                    <xs:annotation>
+                        <xs:documentation>Indica se è presente una Stru associato all'opera</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="xs:boolean">
+                                <xs:attributeGroup ref="gIdentificativi"/>
+                                <xs:attribute default="false" name="costola" type="xs:boolean"/>
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element minOccurs="0" name="msgError" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="it">Oggetto utilizzato per la definizione del messaggio di Errore</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:choice minOccurs="0">
+                    <xs:element minOccurs="0" name="xlimage">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="it">Oggetto utilizzato per indicare le immagini sono delle carte 
+gioegrafiche che devono essere visualizzare con il programma 
+xlimage</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:group ref="gElementSup"/>
+                            <xs:attributeGroup ref="gAElementSup"/>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="IIPImage" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="it">Oggetto utilizzato per indicare le immagini di grandi dimensioni che sono gestite tramite il Software IIPImage</xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:group ref="gElementSup"/>
+                            <xs:attributeGroup ref="gAElementSup"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:choice>
+                <xs:element maxOccurs="unbounded" minOccurs="0" ref="opera:libro"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="gIdentificativi">
+        <xs:attribute name="idr" type="xs:string">
+            <xs:annotation>
+                <xs:documentation xml:lang="it">Indica l'identificativo della risorsa relativa alla collezione</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:attributeGroup name="gAElementSup">
+        <xs:attribute name="titolo" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="it">Titolo dell'opera</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="idrPadre" type="xs:string">
+            <xs:annotation>
+                <xs:documentation xml:lang="it">Identificativo della scheda Padre</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+    <xs:group name="gElementSup">
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" name="pagina">
+                <xs:annotation>
+                    <xs:documentation xml:lang="it">Oggetto utilizzato per definire la singola pagina della 
+                        carta geografica</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="urlPage" type="xs:anyURI" use="required">
+                                <xs:annotation>
+                                    <xs:documentation xml:lang="it">Url che viene richiamato attraverdo il javascript indicato 
+                                        nell'attributo link</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="link" type="xs:string" use="required">
+                                <xs:annotation>
+                                    <xs:documentation xml:lang="it">Viene utilizzato per indicare il javascript da utilizzare per
+                                        cambiare la pagina da visualizzare 
+                                        (default: "javascript:changeImg('0');")</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="key" type="xs:string" use="required">
+                                <xs:annotation>
+                                    <xs:documentation xml:lang="it">Indica la chiave associato alla pagina</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="keyPadre" type="xs:string" use="required">
+                                <xs:annotation>
+                                    <xs:documentation xml:lang="it">Indica la chiave padre a cui è associata la pagina</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:group>
+</xs:schema>

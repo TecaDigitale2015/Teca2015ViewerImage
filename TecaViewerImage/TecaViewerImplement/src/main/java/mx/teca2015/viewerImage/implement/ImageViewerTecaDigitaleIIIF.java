@@ -130,7 +130,7 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 		String result = null;
 		SolrDocument solrDocument = null;
 		File fMag = null;
-		
+		String id = null;
 		try {
 			solrResponse = ImageViewerTecaDigitale.findSolr(request.getParameter("id"));
 			
@@ -142,21 +142,29 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 					mag.getImg().size()>0){
 				obj = new JSONObject();
 
+				id = getURL(request);
 				obj.put("@context","http://iiif.io/api/image/2/context.json");
-				obj.put("@id", getURL(request));
+				obj.put("@id", id);
 				obj.put("@type", "sc:Manifest");
 				obj.put("attribution", "");
 				obj.put("description", "");
+				if (mag.getBib().getTitle() != null &&
+						mag.getBib().getTitle().size()>0 &&
+						mag.getBib().getTitle().get(0).getContent() != null &&
+						mag.getBib().getTitle().get(0).getContent().size()>0){
 				obj.put("label", mag.getBib().getTitle().get(0).getContent().get(0));
+				} else {
+					obj.put("label", "n.d.");
+				}
 				obj.put("logo", "");
 				
 				obj.put("metadata", addMetadata(mag));
 				
-				obj.put("related", Configuration.getValue("web.URLShowImg")+request.getParameter("id"));
+				obj.put("related", getURL("web.URLShowImg", request)+request.getParameter("id"));
 //				obj.put("seeAlso", "http://archive.org/metadata/platowithenglish04platuoft");
-				obj.put("sequence", addSequence(request, mag.getImg(), fMag));
+				obj.put("sequences", addSequence(request, mag.getImg(), fMag, id));
 //				web.URLIIF
-				obj.put("thumbnail", addThumbnail(mag.getImg().get(0), fMag));
+				obj.put("thumbnail", addThumbnail(mag.getImg().get(0), fMag, request));
 				obj.put("viewingHint","paged");
 				result = obj.toString();
 			}
@@ -176,33 +184,77 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 		return result;
 	}
 
-	private Map<String,Object> addSequence(HttpServletRequest request, List<Img> imgs, File fMag) throws ConfigurationException {
+	private String getURL(String key, HttpServletRequest request) throws ConfigurationException {
+		String url = null;
+		String newUrl = null;
+		String prefix = "";
+		int pos = 0;
+		
+		url = Configuration.getValue(key);
+		if (request.getParameter("hostname")!= null) {
+			if (url.startsWith("http://")) {
+				url = url.replace("http://", "");
+				prefix = "http";
+			} else if (url.startsWith("https://")) {
+				url = url.replace("https://", "");
+				prefix = "https";
+			}
+			if (prefix.equals("")) {
+				newUrl = url;
+			} else {
+				pos = url.indexOf("/");
+				if (pos >-1) {
+					url = url.substring(pos);
+				} else {
+					url = "";
+				}
+				newUrl = prefix+"://";
+				newUrl += request.getParameter("hostname");
+				if (request.getParameter("port") != null) {
+					if ((prefix.equals("http") && !request.getParameter("port").equals("80")) ||
+							(prefix.equals("https") && !request.getParameter("port").equals("443"))) {
+						newUrl += ":"+request.getParameter("port");
+					}
+				}
+				newUrl += url;
+			}
+		} else {
+			newUrl = url;
+		}
+		return newUrl;
+	}
+
+	private Collection<Map<String,Object>> addSequence(HttpServletRequest request, List<Img> imgs, File fMag, String id ) throws ConfigurationException {
+		Collection<Map<String,Object>> collection =  null;
 		Map<String, Object> jsonObjects = null;
 
 		try {
+			collection = new ArrayList<Map<String,Object>>();
 			jsonObjects = new HashMap<String, Object>();
 
 			jsonObjects.put("@context", "http://iiif.io/api/image/2/context.json");
-			jsonObjects.put("@id", Configuration.getValue("web.URLIIF")+"/"+
-					request.getParameter("id")+"/canvas/default");
+			jsonObjects.put("@id", id);
+			//Configuration.getValue("web.URLIIF")+"/"+555
+			//		request.getParameter("id"));
 			jsonObjects.put("@type", "sc:Sequence");
-			jsonObjects.put("canvases", addCanvases(imgs, fMag));
+			jsonObjects.put("canvases", addCanvases(imgs, fMag, request));
 			jsonObjects.put("label", "default");
+			collection.add(jsonObjects);
 		} catch (ConfigurationException e) {
 			throw e;
 		}
-		return jsonObjects;
+		return collection;
 	}
 
 
-	private Collection<Map<String,Object>> addCanvases(List<Img> imgs, File fMag) throws ConfigurationException {
+	private Collection<Map<String,Object>> addCanvases(List<Img> imgs, File fMag, HttpServletRequest request) throws ConfigurationException {
 		Collection<Map<String,Object>> jsonObjects = null;
 
 		try {
 			jsonObjects = new ArrayList<Map<String,Object>>();
 			for(Img img: imgs)
 			{
-				jsonObjects.add(addCanvases(img, fMag));
+				jsonObjects.add(addCanvases(img, fMag, request));
 			  }
 		} catch (ConfigurationException e) {
 			throw e;
@@ -212,7 +264,7 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 	}
 
 
-	private Map<String,Object> addCanvases(Img img, File fMag) throws ConfigurationException {
+	private Map<String,Object> addCanvases(Img img, File fMag, HttpServletRequest request) throws ConfigurationException {
 		Map<String, Object> jsonObjects = null;
 
 		try {
@@ -223,15 +275,15 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 			jsonObjects.put("label", img.getNomenclature());
 			jsonObjects.put("width", img.getImageDimensions().getImagewidth());
 			if (checkUsage(img.getUsage())){
-				jsonObjects.put("@id", Configuration.getValue("web.URLIIF")+
+				jsonObjects.put("@id", getURL("web.URLIIF",request)+
 						genFileIIIF(img.getFile().getHref(), fMag)+"/canvas");
-				jsonObjects.put("images", addImages(img.getFile().getHref(), fMag, img.getImageDimensions().getImagewidth(), img.getImageDimensions().getImagelength()));
+				jsonObjects.put("images", addImages(img.getFile().getHref(), fMag, img.getImageDimensions().getImagewidth(), img.getImageDimensions().getImagelength(), request));
 			} else if (img.getAltimg() != null){
 				for (Altimg altimg: img.getAltimg()){
 					if (checkUsage(altimg.getUsage())){
-						jsonObjects.put("@id", Configuration.getValue("web.URLIIF")+
+						jsonObjects.put("@id", getURL("web.URLIIF", request)+
 								genFileIIIF(altimg.getFile().getHref(), fMag)+"/canvas");
-						jsonObjects.put("images", addImages(altimg.getFile().getHref(), fMag, img.getImageDimensions().getImagewidth(), img.getImageDimensions().getImagelength()));
+						jsonObjects.put("images", addImages(altimg.getFile().getHref(), fMag, img.getImageDimensions().getImagewidth(), img.getImageDimensions().getImagelength(), request));
 					}
 				}
 			}
@@ -242,12 +294,12 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 	}
 
 
-	private Collection<Map<String,Object>> addImages(String iiif, File fMag, BigInteger width, BigInteger height) throws ConfigurationException {
+	private Collection<Map<String,Object>> addImages(String iiif, File fMag, BigInteger width, BigInteger height, HttpServletRequest request) throws ConfigurationException {
 		Collection<Map<String,Object>> jsonObjects = null;
 
 		try {
 			jsonObjects = new ArrayList<Map<String,Object>>();
-			jsonObjects.add(addImage(iiif, fMag, width, height));
+			jsonObjects.add(addImage(iiif, fMag, width, height, request));
 		} catch (ConfigurationException e) {
 			throw e;
 		}
@@ -255,18 +307,18 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 	}
 
 
-	private Map<String, Object> addImage(String iiif, File fMag, BigInteger width, BigInteger height) throws ConfigurationException {
+	private Map<String, Object> addImage(String iiif, File fMag, BigInteger width, BigInteger height, HttpServletRequest request) throws ConfigurationException {
 		Map<String, Object> jsonObjects = null;
 
 		try {
 			jsonObjects = new HashMap<String, Object>();
 
 			jsonObjects.put("@context", "http://iiif.io/api/image/2/context.json");
-			jsonObjects.put("@id", Configuration.getValue("web.URLIIF")+
+			jsonObjects.put("@id", getURL("web.URLIIF", request)+
 					genFileIIIF(iiif, fMag)+"/annotation");
 			jsonObjects.put("@type", "oa:Annotation");
 			jsonObjects.put("motivation", "sc:painting");
-			jsonObjects.put("resource", addResource(iiif, fMag, width, height));
+			jsonObjects.put("resource", addResource(iiif, fMag, width, height, request));
 		} catch (ConfigurationException e) {
 			throw e;
 		}
@@ -274,17 +326,17 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 	}
 
 
-	private Map<String, Object> addResource(String iiif, File fMag,  BigInteger width, BigInteger height) throws ConfigurationException {
+	private Map<String, Object> addResource(String iiif, File fMag,  BigInteger width, BigInteger height, HttpServletRequest request) throws ConfigurationException {
 		Map<String, Object> jsonObjects = null;
 
 		try {
 			jsonObjects = new HashMap<String, Object>();
-			jsonObjects.put("@id", Configuration.getValue("web.URLIIF")+
+			jsonObjects.put("@id", getURL("web.URLIIF", request)+
 					genFileIIIF(iiif, fMag)+"/full/full/0/native.jpg");
 			jsonObjects.put("@type", "dctypes:Image");
 			jsonObjects.put("format", "image/jpeg");
 			jsonObjects.put("height", height);
-			jsonObjects.put("service", addService( iiif,  fMag));
+			jsonObjects.put("service", addService( iiif,  fMag, request));
 			jsonObjects.put("width", width);
 		} catch (ConfigurationException e) {
 			throw e;
@@ -293,13 +345,13 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 	}
 
 
-	private Map<String, Object> addService(String iiif, File fMag) throws ConfigurationException {
+	private Map<String, Object> addService(String iiif, File fMag, HttpServletRequest request) throws ConfigurationException {
 		Map<String, Object> jsonObjects = null;
 
 		try {
 			jsonObjects = new HashMap<String, Object>();
 			jsonObjects.put("@context", "http://iiif.io/api/image/2/context.json");
-			jsonObjects.put("@id", Configuration.getValue("web.URLIIF")+
+			jsonObjects.put("@id", getURL("web.URLIIF", request)+
 					genFileIIIF(iiif, fMag));
 			jsonObjects.put("profile", "http://iiif.io/api/image/2/profiles/level2.json");
 		} catch (ConfigurationException e) {
@@ -310,18 +362,18 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 	}
 
 
-	private JSONObject addThumbnail(Img img, File fMag) throws ConfigurationException {
+	private JSONObject addThumbnail(Img img, File fMag, HttpServletRequest request) throws ConfigurationException {
 		JSONObject jsonObject = null;
 		
 		try {
 			if (checkUsage(img.getUsage())){
-				jsonObject = addMetadataRow("@id", Configuration.getValue("web.URLIIF")+
-						genFileIIIF(img.getFile().getHref(), fMag));
+				jsonObject = addMetadataRow("@id", getURL("web.URLIIF", request)+
+						genFileIIIF(img.getFile().getHref(), fMag)+"/full/184,240/0/native.jpg");
 			} else if (img.getAltimg() != null){
 				for (Altimg altimg: img.getAltimg()){
 					if (checkUsage(altimg.getUsage())){
-						jsonObject = addMetadataRow("@id", Configuration.getValue("web.URLIIF")+
-								genFileIIIF(altimg.getFile().getHref(), fMag));
+						jsonObject = addMetadataRow("@id", getURL("web.URLIIF", request)+
+								genFileIIIF(altimg.getFile().getHref(), fMag)+"/full/184,240/0/native.jpg");
 					}
 				}
 			}
@@ -373,22 +425,22 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 	private void addMetadataRow(Collection<JSONObject> metadata, Piece piece) {
 		if (piece != null){
 			if (piece.getYear() != null){
-				metadata.add(addMetadataRow("year", piece.getYear()));
+				metadata.add(addMetadataRowLabel("year", piece.getYear()));
 			}
 			if (piece.getIssue() != null){
-				metadata.add(addMetadataRow("issue", piece.getIssue()));
+				metadata.add(addMetadataRowLabel("issue", piece.getIssue()));
 			}
 			if (piece.getStpiecePer() != null){
-				metadata.add(addMetadataRow("stpiece_per", piece.getStpiecePer()));
+				metadata.add(addMetadataRowLabel("stpiece_per", piece.getStpiecePer()));
 			}
 			if (piece.getPartNumber() != null){
-				metadata.add(addMetadataRow("part_number", piece.getPartNumber().toString()));
+				metadata.add(addMetadataRowLabel("part_number", piece.getPartNumber().toString()));
 			}
 			if (piece.getPartName() != null){
-				metadata.add(addMetadataRow("part_name", piece.getPartName()));
+				metadata.add(addMetadataRowLabel("part_name", piece.getPartName()));
 			}
 			if (piece.getStpieceVol() != null){
-				metadata.add(addMetadataRow("stpiece_vol", piece.getStpieceVol()));
+				metadata.add(addMetadataRowLabel("stpiece_vol", piece.getStpieceVol()));
 			}
 		}
 	}
@@ -396,13 +448,13 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 	private void addMetadataRow(Collection<JSONObject> metadata, String key, BibliographicLevel level) {
 		if (level != null){
 			if (level.equals(BibliographicLevel.A)){
-				metadata.add(addMetadataRow("level", "analitico"));
+				metadata.add(addMetadataRowLabel("level", "analitico"));
 			} else if (level.equals(BibliographicLevel.C)){
-				metadata.add(addMetadataRow("level", "raccolta"));
+				metadata.add(addMetadataRowLabel("level", "raccolta"));
 			} else if (level.equals(BibliographicLevel.M)){
-				metadata.add(addMetadataRow("level", "monografia"));
+				metadata.add(addMetadataRowLabel("level", "monografia"));
 			} else if (level.equals(BibliographicLevel.S)){
-				metadata.add(addMetadataRow("level", "pubblicazione in serie"));
+				metadata.add(addMetadataRowLabel("level", "pubblicazione in serie"));
 			}
 		}
 	}
@@ -411,10 +463,10 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 		if (holdingses != null){
 			for (Holdings holdings : holdingses){
 				if (holdings.getInventoryNumber()!= null){
-					metadata.add(addMetadataRow("inventory", holdings.getInventoryNumber()));
+					metadata.add(addMetadataRowLabel("inventory", holdings.getInventoryNumber()));
 				}
 				if (holdings.getLibrary() != null){
-					metadata.add(addMetadataRow("library", holdings.getLibrary()));
+					metadata.add(addMetadataRowLabel("library", holdings.getLibrary()));
 				}
 				addMetadataRowShelfmark(metadata, holdings.getShelfmark());
 			}
@@ -425,7 +477,7 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 		if (shelfmarks != null){
 			for (Shelfmark shelfmark : shelfmarks){
 				if (shelfmark.getContent() != null){
-					metadata.add(addMetadataRow("shelfmark", shelfmark.getContent()));
+					metadata.add(addMetadataRowLabel("shelfmark", shelfmark.getContent()));
 				}
 			}
 		}
@@ -435,7 +487,7 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 		if (values != null){
 			for (SimpleLiteral value: values){
 				for (String val: value.getContent()){
-					metadata.add(addMetadataRow(key, val));
+					metadata.add(addMetadataRowLabel(key, val));
 				}
 			}
 		}
@@ -446,6 +498,15 @@ public abstract class ImageViewerTecaDigitaleIIIF extends IImageViewer {
 		
 		row = new JSONObject();
 		row.put(key, value);
+		return row;
+	}
+
+	private JSONObject addMetadataRowLabel(String key, String value) {
+		JSONObject row = null;
+		
+		row = new JSONObject();
+		row.put("label", key);
+		row.put("value", value);
 		return row;
 	}
 

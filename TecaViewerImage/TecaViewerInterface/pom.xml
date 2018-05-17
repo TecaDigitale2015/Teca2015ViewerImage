@@ -26,13 +26,13 @@
   	<dependency>
   		<groupId>mx.randalf.configuration</groupId>
   		<artifactId>RandalfConfiguration</artifactId>
-  		<version>1.0.2</version>
+  		<version>1.0.3</version>
   	</dependency>
   	<dependency>
   		<groupId>mx.teca2015.viewerImage.schema</groupId>
   		<artifactId>TecaViewerSchema</artifactId>
-  		<version>1.0.2</version>
+  		<version>1.0.3</version>
   	</dependency>
   </dependencies>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </project>

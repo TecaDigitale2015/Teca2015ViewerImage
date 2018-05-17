@@ -20,7 +20,7 @@
   	<dependency>
   		<groupId>mx.randalf.xsd</groupId>
   		<artifactId>RandalfXsd</artifactId>
-  		<version>1.0.5</version>
+  		<version>1.0.9</version>
   	</dependency>
   </dependencies>
 	<distributionManagement>
@@ -30,5 +30,5 @@
 			<url>http://maven.bncf.firenze.sbn.it/artifactory/libs-release-local</url>
 		</repository>
 	</distributionManagement>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 </project>

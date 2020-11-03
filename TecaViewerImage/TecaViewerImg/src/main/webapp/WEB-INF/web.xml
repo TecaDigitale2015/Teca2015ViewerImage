@@ -7,6 +7,10 @@
 		<servlet-name>servlet/ImageViewer</servlet-name>
 		<servlet-class>mx.teca2015.viewerImage.servlet.TecaViewerImg</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>servlet/SearchOcr</servlet-name>
+		<servlet-class>mx.teca2015.viewerImage.servlet.SearchOcr</servlet-class>
+	</servlet>
 
 	<servlet>
 		<servlet-name>fcgi</servlet-name>
@@ -24,6 +28,10 @@
 	<servlet-mapping>
 		<servlet-name>servlet/ImageViewer</servlet-name>
 		<url-pattern>/servlet/ImageViewer</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>servlet/SearchOcr</servlet-name>
+		<url-pattern>/servlet/SearchOcr</url-pattern>
 	</servlet-mapping>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>

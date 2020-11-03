@@ -53,6 +53,7 @@
             <param name="LevelMax" value="FATAL"/>
         </filter>
     </appender>
+    <!-- 
     <appender name="EMAIL" class="org.apache.log4j.net.SMTPAppender">
         <param name="BufferSize" value="512"/>
         <param name="SMTPHost" value="mail.bncf.firenze.sbn.it"/>
@@ -67,6 +68,7 @@
             <param name="LevelMax" value="FATAL"/>
         </filter>
     </appender>
+     -->
 
     <category name="mx.imageViewer.servlet">
         <level value="WARN"/>
@@ -103,8 +105,15 @@
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDERR"/>
     </category>
+    
+    <category name="mx.teca2015">
+        <level value="DEBUG"/>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="STDERR"/>
+    </category>
     <root>
         <level value="ERROR"/>
-        <appender-ref ref="EMAIL"/>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="STDERR"/>
     </root>
 </log4j:configuration>

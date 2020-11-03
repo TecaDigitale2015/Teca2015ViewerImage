@@ -8,14 +8,6 @@
   <artifactId>TecaViewerInterface</artifactId>
   <groupId>mx.teca2015.viewerImage.interface</groupId>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <!-- GWT needs at least java 1.6 -->
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
-  </properties>
-
   <dependencies>
   	<dependency>
   		<groupId>javax.servlet</groupId>
@@ -26,13 +18,13 @@
   	<dependency>
   		<groupId>mx.randalf.configuration</groupId>
   		<artifactId>RandalfConfiguration</artifactId>
-  		<version>1.0.3</version>
+  		<version>3.0.2</version>
   	</dependency>
   	<dependency>
   		<groupId>mx.teca2015.viewerImage.schema</groupId>
   		<artifactId>TecaViewerSchema</artifactId>
-  		<version>1.0.3</version>
+  		<version>3.0.1</version>
   	</dependency>
   </dependencies>
-  <version>1.0.3</version>
+  <version>3.0.0</version>
 </project>

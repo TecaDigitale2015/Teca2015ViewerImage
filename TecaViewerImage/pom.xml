@@ -14,6 +14,12 @@
 		<module>TecaViewerImgStatic</module>
 		<module>TecaViewerImager</module>
 	</modules>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- GWT needs at least java 1.6 -->
+    <maven.compiler.source>1.9</maven.compiler.source>
+    <maven.compiler.target>1.9</maven.compiler.target>
+  </properties>
 	<distributionManagement>
 		<repository>
 			<id>mvn-bncf</id>

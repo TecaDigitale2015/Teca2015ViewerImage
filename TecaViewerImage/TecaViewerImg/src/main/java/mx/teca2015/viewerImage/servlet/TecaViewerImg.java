@@ -6,6 +6,7 @@ package mx.teca2015.viewerImage.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
 
 import javax.servlet.Servlet;
@@ -293,7 +294,7 @@ public class TecaViewerImg extends HttpServlet implements Servlet {
 				ConverterXsl
 						.convertXsl(
 								fileXsl,
-								imageViewerXsd.writeInputStream(imgViewer, new ImageViewerNamespacePrefixMapper()),
+								imageViewerXsd.writeInputStream(imgViewer, new ImageViewerNamespacePrefixMapper(), false),
 								response.getOutputStream());
 			} else{
 				throw new ServletException(
@@ -350,7 +351,7 @@ public class TecaViewerImg extends HttpServlet implements Servlet {
 						.convertXsl(
 								fileXsl,
 								imageViewerXsd.writeInputStream(imgViewer, 
-										new ImageViewerNamespacePrefixMapper()),
+										new ImageViewerNamespacePrefixMapper(), false),
 								response.getOutputStream());
 			} else{
 				throw new ServletException(
@@ -397,7 +398,7 @@ public class TecaViewerImg extends HttpServlet implements Servlet {
 				response.setContentType("text/xml; charset=UTF-8");
 				response.setCharacterEncoding("UTF-8");
 				operaXsd = new OperaXsd();
-				operaXsd.write(opera, response.getOutputStream(), null, null, null, null);
+				operaXsd.write(opera, response.getOutputStream(), null, null, null, null, false);
 			} else{
 				throw new ServletException(
 						"Non risulta essere presente le informazioni del libro");
@@ -420,7 +421,8 @@ public class TecaViewerImg extends HttpServlet implements Servlet {
 	@SuppressWarnings("rawtypes")
 	private void bookReader(HttpServletRequest request, HttpServletResponse response, String className)
 			throws  ClassNotFoundException, InstantiationException, IllegalAccessException,
-			ServletException, IOException, XsdException {
+			ServletException, IOException, XsdException, IllegalArgumentException, 
+			InvocationTargetException, NoSuchMethodException,SecurityException {
 		IImageViewer imageViewer = null;
 		Class myClass = null;
 		ReadBook readBook = null;
@@ -428,7 +430,7 @@ public class TecaViewerImg extends HttpServlet implements Servlet {
 
 		try {
 			myClass = Class.forName(className);
-			imageViewer = (IImageViewer) myClass.newInstance();
+			imageViewer = (IImageViewer) myClass.getDeclaredConstructor().newInstance();
 
 			imageViewer.initPage(request, response, request.getServerName());
 
@@ -440,7 +442,7 @@ public class TecaViewerImg extends HttpServlet implements Servlet {
 				readBookXsd = new ReadBookXsd();
 				readBookXsd.write(readBook, response.getOutputStream(), 
 						new ImageViewerNamespacePrefixMapper(), null, 
-						null, null);
+						null, null, false);
 			} else{
 				throw new ServletException(
 						"Non risulta essere presente le informazioni del libro");
@@ -456,6 +458,14 @@ public class TecaViewerImg extends HttpServlet implements Servlet {
 		} catch (IOException e) {
 			throw e;
 		} catch (XsdException e) {
+			throw e;
+		} catch (IllegalArgumentException e) {
+			throw e;
+		} catch (InvocationTargetException e) {
+			throw e;
+		} catch (NoSuchMethodException e) {
+			throw e;
+		} catch (SecurityException e) {
 			throw e;
 		}
 

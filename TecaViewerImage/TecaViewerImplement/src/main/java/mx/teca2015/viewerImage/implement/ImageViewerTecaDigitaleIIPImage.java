@@ -7,6 +7,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocumentList;
 
 import it.sbn.iccu.metaag1.Bib;
+import it.sbn.iccu.metaag1.Gen;
 import it.sbn.iccu.metaag1.Img;
 import it.sbn.iccu.metaag1.Img.Altimg;
 import it.sbn.iccu.metaag1.Metadigit;
@@ -17,6 +18,7 @@ import mx.randalf.configuration.exception.ConfigurationException;
 import mx.randalf.solr.exception.SolrException;
 import mx.randalf.xsd.exception.XsdException;
 import mx.teca2015.viewerImage.imageViewer.imager.exception.ImageException;
+import mx.teca2015.viewerImage.implement.readBook.ReadBook;
 import mx.teca2015.viewerImage.implement.showImage.DatiImmagini;
 import mx.teca2015.viewerImage.interfacie.exception.ImageViewerException;
 
@@ -55,7 +57,8 @@ public abstract class ImageViewerTecaDigitaleIIPImage extends ImageViewerTecaDig
 //					iipImage.setIdrPadre(value);
 					for (int x=0; x<mag.getImg().size(); x++){
 						if (isIIPImage(mag.getImg().get(x))){
-							iipImage.getPagina().add(genPagina(solrResponse, mag.getImg().get(x), iipImage.getPagina().size()));
+							iipImage.getPagina().add(
+									genPagina(solrResponse, mag.getImg().get(x), iipImage.getPagina().size(), mag.getGen()));
 						}
 					}
 				}
@@ -78,7 +81,7 @@ public abstract class ImageViewerTecaDigitaleIIPImage extends ImageViewerTecaDig
 		return iipImage;
 	}
 
-	private Pagina genPagina(SolrDocumentList solrResponse, Img img, int size) throws ImageException, ConfigurationException{
+	private Pagina genPagina(SolrDocumentList solrResponse, Img img, int size, Gen gen) throws ImageException, ConfigurationException{
 		Pagina pagina = null;
 		DatiImmagini datiImmagini = null;
 		Altimg altImg = null;
@@ -89,7 +92,7 @@ public abstract class ImageViewerTecaDigitaleIIPImage extends ImageViewerTecaDig
 			if (checkUsage(img.getUsage())){
 				datiImmagini = new DatiImmagini(solrResponse.get(0), 
 						img.getFile().getHref(),
-						img.getFormat().getMime().value());
+						ReadBook.getFormat(img, gen).getMime().value());
 				pagina.setUrlPage(datiImmagini.getURL().toString());
 
 				pagina.setLink((String) Configuration.getValueDefault("bncf.iipImage.link","javascript:changeImg")+"('"+size+"')");
@@ -102,7 +105,7 @@ public abstract class ImageViewerTecaDigitaleIIPImage extends ImageViewerTecaDig
 					if (checkUsage(altImg.getUsage())){
 						datiImmagini = new DatiImmagini(solrResponse.get(0), 
 								altImg.getFile().getHref(),
-								altImg.getFormat().getMime().value());
+								ReadBook.getFormat(altImg, gen).getMime().value());
 						pagina.setUrlPage(datiImmagini.getURL().toString());
 
 						pagina.setLink((String) Configuration.getValueDefault("bncf.iipImage.link","javascript:changeImg")+"('"+size+"')");

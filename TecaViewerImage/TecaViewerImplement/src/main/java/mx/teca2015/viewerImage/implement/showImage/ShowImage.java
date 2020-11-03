@@ -87,7 +87,7 @@ public class ShowImage
 //					rs.getString("imgUsage").equals(usage) ||
 //					forceUsage){
 
-					sequence =new Integer(request.getParameter("sequence"));
+					sequence = Integer.valueOf(request.getParameter("sequence"));
 					if (mag.getImg()!= null &&
 							mag.getImg().size()>=sequence){
 						img = mag.getImg().get(sequence-1);
@@ -95,7 +95,7 @@ public class ShowImage
 						if (ReadBook.checkUsage(img.getUsage(), usage)){
 							datiImmagini = new DatiImmagini(solrResponse.get(0), 
 									img.getFile().getHref(),
-									img.getFormat().getMime().value());
+									ReadBook.getFormat(img, mag.getGen()).getMime().value());
 						} else {
 							if (img.getAltimg()!= null &&
 									img.getAltimg().size()>0){
@@ -103,7 +103,7 @@ public class ShowImage
 									if (ReadBook.checkUsage(img.getAltimg().get(x).getUsage(), usage)){
 										datiImmagini = new DatiImmagini(solrResponse.get(0), 
 												img.getAltimg().get(x).getFile().getHref(),
-												img.getAltimg().get(x).getFormat().getMime().value());
+												ReadBook.getFormat(img.getAltimg().get(x), mag.getGen()).getMime().value());
 										break;
 									}
 								}

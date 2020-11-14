@@ -22,7 +22,7 @@
   	<dependency>
   		<groupId>mx.randalf.mag</groupId>
   		<artifactId>RandalfMag</artifactId>
-  		<version>3.0.11</version>
+  		<version>3.0.12</version>
   	</dependency>
   	<dependency>
   		<groupId>mx.teca2015.viewerImage.imager</groupId>
@@ -48,5 +48,5 @@
   	</dependency>
   	 -->
   </dependencies>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
 </project>

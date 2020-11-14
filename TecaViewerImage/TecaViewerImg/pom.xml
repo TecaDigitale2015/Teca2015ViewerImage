@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>mx.teca2015.viewerImage.implement</groupId>
 			<artifactId>TecaViewerImplement</artifactId>
-			<version>3.0.0</version>
+			<version>3.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jfastcgi</groupId>
@@ -215,5 +215,5 @@
 			<url>http://maven.bncf.firenze.sbn.it/artifactory/libs-release-local</url>
 		</repository>
 	</distributionManagement>
-	<version>3.0.2</version>
+	<version>3.0.3</version>
 </project>
